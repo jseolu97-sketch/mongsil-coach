@@ -1,0 +1,11 @@
+{
+  "name": "mongsil-coach",
+  "version": "1.0.0",
+  "private": true,
+  "description": "중학생 학습 코치 웹앱 몽실이 (Gemini AI 질문 코치 서버 포함)",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env dev-server.mjs"
+  }
+}
