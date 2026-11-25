@@ -547,26 +547,27 @@ function getWorld(){
 }
 function buildWorld(host){
   const T=THREE;
+  if(T.ColorManagement) T.ColorManagement.legacyMode=false; // 색을 sRGB로 해석해서 바닥·건물 색이 하얗게 바래지 않게
   const renderer=new T.WebGLRenderer({antialias:true,alpha:true});
   renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
   renderer.outputEncoding=T.sRGBEncoding; renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
   host.append(renderer.domElement);
   const loading=h("div",{class:"wload"},"몽실이가 섬에 오는 중…"); host.append(loading);
   const scene=new T.Scene();
-  const cam=new T.PerspectiveCamera(42,1.6,0.1,200);
+  const cam=new T.PerspectiveCamera(42,1.6,1,140);
   scene.add(new T.HemisphereLight(0xffffff,0x8fb39a,0.85));
   const sun=new T.DirectionalLight(0xffffff,0.9); sun.position.set(8,14,6); sun.castShadow=true;
-  sun.shadow.mapSize.set(1024,1024); Object.assign(sun.shadow.camera,{left:-12,right:12,top:12,bottom:-12}); scene.add(sun);
+  sun.shadow.mapSize.set(2048,2048); Object.assign(sun.shadow.camera,{left:-12,right:12,top:12,bottom:-12,near:1,far:40}); sun.shadow.bias=-0.0006; sun.shadow.normalBias=0.03; scene.add(sun);
   const mat=c=>new T.MeshStandardMaterial({color:c,roughness:.85,metalness:0});
   let clockHand=null, hop=0;
   // sea + island
   const sea=new T.Mesh(new T.CircleGeometry(60,48),new T.MeshStandardMaterial({color:cssVar("--sea"),roughness:.4,transparent:true,opacity:.9}));
   sea.rotation.x=-Math.PI/2; sea.position.y=-0.6; scene.add(sea);
-  const sand=new T.Mesh(new T.CylinderGeometry(10.6,11.4,0.9,48),mat(0xF3DDAA)); sand.position.y=-0.45; sand.receiveShadow=true; scene.add(sand);
+  const sand=new T.Mesh(new T.CylinderGeometry(10.6,11.4,0.9,48),mat(0xF3DDAA)); sand.position.y=-0.52; sand.receiveShadow=true; scene.add(sand);
   const grass=new T.Mesh(new T.CylinderGeometry(9.6,10,0.4,48),mat(0x9BD67E)); grass.position.y=-0.2; grass.receiveShadow=true; scene.add(grass);
   const ground=grass; // raycast target
   // path ring
-  const ring=new T.Mesh(new T.RingGeometry(5.2,6.2,48),mat(0xEAD7A8)); ring.rotation.x=-Math.PI/2; ring.position.y=0.01; ring.receiveShadow=true; scene.add(ring);
+  const ringMat=mat(0xEAD7A8); Object.assign(ringMat,{polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}); const ring=new T.Mesh(new T.RingGeometry(5.2,6.2,64),ringMat); ring.rotation.x=-Math.PI/2; ring.position.y=0.04; ring.receiveShadow=true; scene.add(ring);
   const add=(geo,m,x,y,z,parent=scene)=>{ const o=new T.Mesh(geo,m); o.position.set(x,y,z); o.castShadow=true; o.receiveShadow=true; parent.add(o); return o; };
   // buildings
   const builders={
